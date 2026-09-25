@@ -39,6 +39,14 @@ MIN_SPIKES = 250
 # 'noise' is always excluded.
 INCLUDE_LABELS = ('good', 'mua')
 
+# Known physical arena extent (pixels), used as fixed spatial bin edges.
+# Tracked positions occasionally jitter slightly outside this envelope
+# (SLEAP noise near the arena walls), but bins should tile the actual
+# arena rather than stretch to whatever the noisy tracked extent happens
+# to be for a given session.
+ARENA_X_RANGE_PX = (0, 888)
+ARENA_Y_RANGE_PX = (0, 1968)
+
 # Spatial bin size in pixels for occupancy/rate maps.
 BIN_SIZE_PX = 129 # 129/2.54cm 50.7/cm
 

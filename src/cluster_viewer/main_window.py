@@ -2,7 +2,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QComboBox, QHBoxLayout, QLabel, QMainWindow, QPushButton,
+    QAbstractItemView, QComboBox, QHBoxLayout, QLabel, QMainWindow, QPushButton,
     QSplitter, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
 )
 
@@ -78,7 +78,10 @@ class MainWindow(QMainWindow):
         self.cluster_table.setHorizontalHeaderLabels(COLUMNS)
         self.cluster_table.setMaximumWidth(560)
         self.cluster_table.setSortingEnabled(True)
-        self.cluster_table.cellClicked.connect(self._on_cluster_row_clicked)
+        self.cluster_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        # currentCellChanged (not cellClicked) so up/down-arrow row navigation
+        # updates the plot too, not just mouse clicks.
+        self.cluster_table.currentCellChanged.connect(self._on_current_cell_changed)
         splitter.addWidget(self.cluster_table)
         splitter.setStretchFactor(0, 1)
         splitter.setStretchFactor(1, 0)
@@ -165,11 +168,12 @@ class MainWindow(QMainWindow):
         self.cluster_table.resizeColumnsToContents()
         self.cluster_table.setSortingEnabled(True)
 
-    def _on_cluster_row_clicked(self, row: int, _col: int):
-        if self.session is None:
+    def _on_current_cell_changed(self, row: int, _col: int, _prev_row: int, _prev_col: int):
+        if self.session is None or row < 0:
             return
         key = self.cluster_table.item(row, 0).data(Qt.UserRole)
         cluster = self._cluster_by_key.get(key)
         if cluster is not None:
-            title = f"{self.session.animal} {self.session.session}"
+            title = (f"{self.session.animal} {self.session.session}  |  "
+                     f"Cluster {cluster.cluster_id} ({cluster.region.upper()})")
             self.plot_widget.set_cluster(self.session, cluster, title=title)

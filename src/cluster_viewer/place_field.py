@@ -8,16 +8,19 @@ import numpy as np
 from scipy.stats import norm
 
 
-def make_bin_edges(x, y, bin_size_px):
-    """Spatial bin edges spanning the tracked positions, with a half-bin margin."""
-    margin = bin_size_px * 0.5
-    x_min, x_max = np.nanmin(x) - margin, np.nanmax(x) + margin
-    y_min, y_max = np.nanmin(y) - margin, np.nanmax(y) + margin
-    x_bins = int(np.ceil((x_max - x_min) / bin_size_px))
-    y_bins = int(np.ceil((y_max - y_min) / bin_size_px))
-    x_edges = np.linspace(x_min, x_max, x_bins + 1)
-    y_edges = np.linspace(y_min, y_max, y_bins + 1)
-    return x_edges, y_edges
+def make_bin_edges(x_range, y_range, bin_size_px):
+    """
+    Spatial bin edges tiling a fixed physical extent exactly (e.g. the known
+    arena bounds in config.ARENA_X_RANGE_PX/ARENA_Y_RANGE_PX), rather than
+    the tracked positions' own min/max - which run slightly outside the
+    arena in places (tracking noise) and would otherwise shift bin edges off
+    the true (0, 0) corner and stretch them past the far wall.
+    """
+    def edges_for(lo, hi):
+        n_bins = max(1, round((hi - lo) / bin_size_px))
+        return np.linspace(lo, hi, n_bins + 1)
+
+    return edges_for(*x_range), edges_for(*y_range)
 
 
 def align_spikes(spike_times, frame_ms, x, y):

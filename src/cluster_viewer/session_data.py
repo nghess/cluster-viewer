@@ -143,9 +143,11 @@ class ClusterSessionData:
         self.x = events[x_col].to_numpy(dtype=float)
         self.y = events[y_col].to_numpy(dtype=float)
 
-        # Occupancy/bin edges depend only on position tracking, not spikes,
-        # so they're computed once here and shared across every cluster.
-        self.x_edges, self.y_edges = place_field.make_bin_edges(self.x, self.y, config.BIN_SIZE_PX)
+        # Bin edges tile the known fixed arena extent (not the tracked
+        # positions' own min/max), so they're the same across every session
+        # and shared across every cluster here.
+        self.x_edges, self.y_edges = place_field.make_bin_edges(
+            config.ARENA_X_RANGE_PX, config.ARENA_Y_RANGE_PX, config.BIN_SIZE_PX)
         self.occupancy_time, _ = place_field.compute_occupancy(
             self.frame_ms, self.x, self.y, self.x_edges, self.y_edges)
         self.p_i = (self.occupancy_time / np.sum(self.occupancy_time)).flatten()

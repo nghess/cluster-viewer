@@ -54,6 +54,8 @@ class PlaceFieldPlot(QWidget):
         ax0 = fig.add_subplot(gs[0, 0])
         ax0.plot(session.x, session.y, 'o', ms=1, alpha=0.1, color='C0')
         ax0.scatter(cluster.spike_x, cluster.spike_y, s=2, color='red', alpha=1, zorder=2)
+        ax0.set_xlim(extent[0], extent[1])
+        ax0.set_ylim(extent[2], extent[3])
         ax0.set_aspect('equal', adjustable='box')
         ax0.set_xlabel('Head X', fontsize=fontsize)
         ax0.set_ylabel('Head Y', fontsize=fontsize)
